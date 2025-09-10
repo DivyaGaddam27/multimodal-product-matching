@@ -8,7 +8,6 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torchvision import transforms
 
-# --- Import necessary classes from other files ---
 from dataset import ShopeeDataset
 from model import MultiModalModel
 
@@ -23,7 +22,6 @@ def create_index(data_dir, model_path="multi_modal_model.pth", index_path="faiss
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
-    # Corrected: Use 'train' mode for the full index
     train_dataset = ShopeeDataset(data_dir=data_dir, mode='train', transform=image_transform)
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False, num_workers=0)
 
@@ -39,7 +37,6 @@ def create_index(data_dir, model_path="multi_modal_model.pth", index_path="faiss
     ids = []
     with torch.no_grad():
         for batch in tqdm(train_loader, desc="Generating Embeddings"):
-            # Corrected: Use the 'anchor' keys from the batch
             image = batch['anchor_image'].to(device)
             text_input_ids = batch['anchor_text']['input_ids'].squeeze(1).to(device)
             text_attention_mask = batch['anchor_text']['attention_mask'].squeeze(1).to(device)
