@@ -72,7 +72,7 @@ class ShopeeDataset(Dataset):
                         'posting_id': anchor_row['posting_id'] # <-- Corrected: Add posting_id
                     }
 
-                else: # 'val' or 'inference' mode
+                else: 
                     return {
                         'image': anchor_image,
                         'text': anchor_text_tokens,
