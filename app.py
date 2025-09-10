@@ -14,13 +14,11 @@ from collections import defaultdict
 import torch.nn as nn
 from tqdm import tqdm
 
-# --- Import necessary classes from other files ---
 from dataset import ShopeeDataset
 from model import MultiModalModel, ImageEncoder, TextEncoder
 
 app = Flask(__name__)
 
-# --- Load the trained model and FAISS index on app startup ---
 device = torch.device("cpu")
 model = MultiModalModel().to(device)
 model.load_state_dict(torch.load("multi_modal_model.pth", map_location=device))
