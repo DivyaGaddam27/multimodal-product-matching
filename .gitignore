@@ -1,0 +1,10 @@
+# Ignore datasets
+shopee-product-matching/
+
+# Ignore Python virtual environment
+.venv/
+
+# Ignore saved model files
+multi_modal_model.pth
+*.npy
+*.bin

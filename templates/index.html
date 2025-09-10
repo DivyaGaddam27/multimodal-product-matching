@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-modal Product Search</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #74ebd5, #9face6);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-top: 30px;
+      color: #fff;
+      font-size: 2.2rem;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+
+    form {
+      background: #fff;
+      padding: 25px;
+      margin-top: 20px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      width: 350px;
+      gap: 15px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    input[type="file"], input[type="text"] {
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input[type="file"]:hover, input[type="text"]:focus {
+      border-color: #6a11cb;
+    }
+
+    button {
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      border: none;
+      padding: 12px;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .error-message {
+      color: red;
+      font-size: 0.9rem;
+    }
+
+    #image-preview {
+      max-width: 250px;
+      margin-top: 15px;
+      border-radius: 10px;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    #results {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .product-card {
+      background: #fff;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-8px);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .product-card h4 {
+      margin: 10px;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .product-card p {
+      margin: 10px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    /* Loading Spinner */
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #6a11cb;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🔍 Multi-modal Product Search</h1>
+
+  <form id="search-form">
+    <label for="image">Upload Image:</label>
+    <input type="file" id="image-input" name="image" accept="image/*" required>
+
+    <label for="text">Enter Text:</label>
+    <input type="text" id="text-input" name="text" required>
+
+    <button type="submit">Search</button>
+    <div id="error-message" class="error-message"></div>
+  </form>
+
+  <img id="image-preview" alt="Image Preview">
+  <div class="loader" id="loader"></div>
+  <div id="results"></div>
+
+  <script>
+    document.getElementById('image-input').addEventListener('change', function(e) {
+      const preview = document.getElementById('image-preview');
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      if (file) {
+        reader.onload = function() {
+          preview.src = reader.result;
+          preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = 'none';
+      }
+    });
+
+    document.getElementById('search-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const resultsDiv = document.getElementById('results');
+      const loader = document.getElementById('loader');
+      const errorMessageDiv = document.getElementById('error-message');
+
+      resultsDiv.innerHTML = '';
+      errorMessageDiv.innerHTML = '';
+      loader.style.display = 'block';
+
+      try {
+        const response = await fetch('/search', {
+          method: 'POST',
+          body: formData
+        });
+
+        loader.style.display = 'none';
+
+        if (!response.ok) {
+          throw new Error('Server error, please try again.');
+        }
+
+        const products = await response.json();
+        resultsDiv.innerHTML = '<h2 style="grid-column: 1/-1; color:white;">Similar Products</h2>';
+
+        products.forEach(product => {
+          const card = document.createElement('div');
+          card.className = 'product-card';
+          card.innerHTML = `
+            <img src="${product.image_url}" alt="${product.title}">
+            <h4>${product.title}</h4>
+            <p>Distance: ${product.distance.toFixed(4)}</p>
+          `;
+          resultsDiv.appendChild(card);
+        });
+
+      } catch (error) {
+        loader.style.display = 'none';
+        errorMessageDiv.innerHTML = error.message;
+      }
+    });
+  </script>
+</body>
+</html>

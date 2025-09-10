@@ -1,0 +1,9 @@
+torch
+torchvision
+transformers
+sentence-transformers
+Pillow
+pandas
+scikit-learn
+tqdm
+faiss-cpu
